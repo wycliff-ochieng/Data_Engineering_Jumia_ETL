@@ -38,4 +38,15 @@ for page in pages:
 TV = pd.DataFrame(TV_data,columns=['name','price','initial_price','percentage_discount'])
 print(TV)
 
+TV.to_csv('jumiatv.csv',index=False)
+
+
+phone_page = [x for x in range(1,)]
+phone_name = []
+phone_price = []
+previous_price = []
+
+for phone in phone_page:
+    
+
 
