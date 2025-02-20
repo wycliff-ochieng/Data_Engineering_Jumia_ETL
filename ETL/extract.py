@@ -36,17 +36,44 @@ for page in pages:
         }
 
 TV = pd.DataFrame(TV_data,columns=['name','price','initial_price','percentage_discount'])
-print(TV)
+#print(TV)
 
 TV.to_csv('jumiatv.csv',index=False)
 
 
-phone_page = [x for x in range(1,)]
+phone_pages = [x for x in range(1,51)]
 phone_name = []
 phone_price = []
-previous_price = []
+old_price = []
+percentage_discount = []
 
-for phone in phone_page:
-    
+for phone in phone_pages:
+    url2 = f'https://www.jumia.co.ke/mobile-phones/?price_discount=10-100&page={phone}#catalog-listing'
+    r2 = requests.get(url2)
+    soup = BeautifulSoup(r2.text,'lxml')
+
+    brand = soup.find_all('h3', class_='name')
+    for name in brand:
+        phone_name.append(name.text)
+    prc = soup.find_all('div',class_='prc')
+    for price in prc:
+        phone_price.append(price.text)
+    prev_prc = soup.find_all('div',class_='old')
+    for price in prev_prc:
+        old_price.append(price.text)
+    p_discount = soup.find_all('div','bdg _dsct _sum')
+    for p_dsct in p_discount:
+        percentage_discount.append(p_dsct.text)
+
+    phone_data = {
+        "name":phone_name,
+        "price":phone_price,
+        "before":old_price,
+        "discount":percentage_discount
+    }
+phones = pd.DataFrame(phone_data,columns=["name","price","before","discount"])
+
+phones.to_csv("jumia_phones.csv",index=False)
+
 
 
