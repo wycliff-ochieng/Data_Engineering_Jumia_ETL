@@ -2,22 +2,33 @@ import boto3
 import logging
 import psycopg2
 import os
-import config
+import yaml
 
-s3 = boto3.clent('s3')
+s3 = boto3.client('s3')
+logging.basicConfig(filename='myapp.log', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 with open('pw.txt','r') as f:
-    pw = f.read(f)
+    pw = f.read()
 
-def load_s3(file_name,key,bucket):
-    logging.basicConfig(filename='myapp.log', level=logging.INFO)
+with open('./config/config.yaml','r') as f:
+    config = yaml.safe_load(f)
+
+s3_key = config['s3']['s3_key']
+file_path = config['local']['file_path'] 
+bucket_name = config['s3']['bucket_name']
+
+
+def load_s3(s3_key,file_path,bucket_name):
     try:
-        s3.upload_file(file_name,key,bucket)
-        logger.INFO("SUCCESSFULLY LOADED")
+        s3.upload_file(file_path,bucket_name,s3_key)
+        logger.info("SUCCESSFULLY LOADED")
+        print('Loaded successfully')
     except Exception as e:
-        print("Failed")
-        logger.ERROR("FAILED")
+        print("Failed", e)
+        logger.error("FAILED")
+
+load_s3(s3_key,file_path,bucket_name)
 
 def load_postgres(table_name):
     conn = psycopg2.connect(
