@@ -5,8 +5,8 @@ import yaml
 class ETL:
     def __init__(self,app_name:str):
         self.spark = (SparkSession.builder.appName(app_name) \
-                      .config("spark.hadoop.fs.s3a.access.key", "your-aws-access-key") \
-                      .config("spark.hadoop.fs.s3a.secret.key", "your-aws-secret-key") \
+                      .config("spark.hadoop.fs.s3a.access.key", access_key) \
+                      .config("spark.hadoop.fs.s3a.secret.key", secret_key) \
                       .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com") \
                       .config("spark.hadoop.fs.s3a.connection.maximum", "100") \
                       .getOrCreate())
@@ -20,15 +20,15 @@ class ETL:
         transformed_df = df.dropna()
         return transformed_df
     
-    def write_to_postgres(self,transformed_df,table:str,password:str,port:int,user:str,host:str):
+    def write_to_postgres(self,transformed_df,table:str,pw:str,port:int,user:str,host:str):
+        jdbc_url = f"jdbc:postgresql://{host}:{port}/your_database_name"
         properties = {
             "user":user,
             "password":pw,
-            "host":host,
-            "table":table,
-            "port":port
+            "driver":"org.postgres.Driver"
         }
-        transformed_df.write.mode('overwrite')
+
+        transformed_df.write.jdbc(url=jdbc_url,table=table,mode='overwrite',properties=properties)
     
 
     def stop(self):
@@ -44,6 +44,8 @@ table = config['postgres']['table_name']
 user = config['postgres']['user']
 host = config['postgres']['user']
 port = config['postgres']['host']
+access_key = config['s3']['access_key']
+secret_key = config['s3']['access_key']
 
 
 if __name__ =="__main":
